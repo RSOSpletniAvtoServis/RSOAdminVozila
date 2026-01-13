@@ -15,6 +15,9 @@ def read_root():
 def read_items():
     return {"Tu": "So izdelki"}
 
+@app.get("/key/")
+def return_key():
+    return {"Public key": "Kljuc"}
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
