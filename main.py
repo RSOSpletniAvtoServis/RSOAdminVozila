@@ -48,6 +48,10 @@ def get_kraji():
     return {"Kraji": "kraj"}
 
 
+@app.get("/flf/")
+def read_root():
+    return {"Dela": "In to hitrejs"}
+
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
