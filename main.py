@@ -80,7 +80,7 @@ def get_kraji():
     try:
         conn = pool.get_connection()
         # Create a cursor
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         # Run a SELECT query
         query = "SELECT * FROM Kraj"
