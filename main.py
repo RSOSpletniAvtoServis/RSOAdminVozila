@@ -35,6 +35,13 @@ class Kraj(BaseModel):
     latitude: str
     uniqueid: str
 
+class Kraj1(BaseModel):
+    idkraj: str
+    naziv: str
+    longitude: str
+    latitude: str
+    uniqueid: str
+
 @app.get("/")
 def read_root():
     return {"Mikrostoritev": "AdminVozila"}
@@ -68,10 +75,8 @@ def dodajKraj(kraj: Kraj):
     return {"Kraji": "unknown"}    
     
     
-
 @app.get("/kraji/")
 def get_kraji():
-    
     try:
         conn = pool.get_connection()
         # Create a cursor
@@ -84,24 +89,63 @@ def get_kraji():
         # Fetch all rows
         rows = cursor.fetchall()
 
-        # Process results
-        for row in rows:
-            print(row)  # row is a tuple: (id, name, email)
-
-        # Clean up
+        result = {row['id']: row for row in rows}
+        return result
+ 
+    except Exception as e:
+        print("Error: ", e)
+        return {"Kraji": "failed, "Error":, e}
+    finally:
         cursor.close()
-        conn.close()   
+        conn.close() 
+    return {"Kraji": "failed"}    
+
+@app.get("/kraj/{krajid}")
+def get_kraj(krajid: int):
+    
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        # Run a SELECT query
+        query = "SELECT * FROM Kraj where IDKraj = %s"
+        cursor.execute(query,(krajid,))
+
+        row = cursor.fetchone()
+
+        if row is not None:
+            print(row)
+            return {"IDKraj": row[0], "NazivKraja": row[1], "Longitude": row[2], "Latitude": row[3]}
+ 
     except Exception as e:
         print("Error: ", e)
     finally:
         cursor.close()
         conn.close() 
-    return {"Kraji": "kraj"}
+    return {"Kraji": "failed"}
+
+@app.put("/posodobikraj/")
+def posodobi_kraj(kraj: Kraj1):
+    userid = kraj.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Kraj SET NazivKraja = %s, Longitude = %s, Latitude = %s WHERE IDKraj = %s"
+        cursor.execute(query,(kraj.naziv,kraj.longitude,kraj.latitude,kraj.idkraj))
+        return {"Kraji": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Kraji": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Kraji": "unknown"}    
 
 
-@app.get("/flf/")
-def read_root():
-    return {"Dela": "In to hitrejs"}
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
