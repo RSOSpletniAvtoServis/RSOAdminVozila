@@ -31,7 +31,7 @@ app.add_middleware(
 
 class Kraj(BaseModel):
     naziv: str
-    logitude: str
+    longitude: str
     latitude: str
     uniqueid: str
 
