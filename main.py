@@ -94,7 +94,7 @@ def get_kraji():
  
     except Exception as e:
         print("Error: ", e)
-        return {"Kraji": "failed", "Error":, e}
+        return {"Kraji": "failed", "Error": e}
     finally:
         cursor.close()
         conn.close() 
