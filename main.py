@@ -237,7 +237,7 @@ def posodobi_znamko(znamka: Znamka1):
         # Create a cursor
         cursor = conn.cursor()
 
-        query = "UPDATE Kraj SET NazivZnamke = %s WHERE IDZnamka = %s"
+        query = "UPDATE Znamka SET NazivZnamke = %s WHERE IDZnamka = %s"
         cursor.execute(query,(znamka.naziv,znamka.idznamka))
         return {"Znamke": "passed"}
   
