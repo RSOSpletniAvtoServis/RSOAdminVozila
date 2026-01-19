@@ -89,7 +89,7 @@ def get_kraji():
         # Fetch all rows
         rows = cursor.fetchall()
 
-        result = {row['id']: row for row in rows}
+        result = {row['IDKraj']: row for row in rows}
         return result
  
     except Exception as e:
@@ -123,7 +123,7 @@ def get_kraj(krajid: int):
     finally:
         cursor.close()
         conn.close() 
-    return {"Kraji": "failed"}
+    return {"Kraji": "undefined"}
 
 @app.put("/posodobikraj/")
 def posodobi_kraj(kraj: Kraj1):
