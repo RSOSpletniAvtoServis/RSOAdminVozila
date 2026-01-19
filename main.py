@@ -147,7 +147,104 @@ def posodobi_kraj(kraj: Kraj1):
 
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+# Za Znamke
+class Znamka(BaseModel):
+    naziv: str
+    uniqueid: str
+
+class Znamka1(BaseModel):
+    idznamka: str
+    naziv: str
+    uniqueid: str
     
+@app.post("/dodajznamko/")
+def dodajZnamko(znamka: Znamka):
+    userid = znamka.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "INSERT INTO Znamka(NazivZnamke) VALUES (%s)"
+        cursor.execute(query,(znamka.naziv,))
+        return {"Znamka": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Znamka": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Znamka": "unknown"}    
+    
+    
+@app.get("/znamke/")
+def get_znamke():
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor(dictionary=True)
+
+        # Run a SELECT query
+        query = "SELECT * FROM Znamka"
+        cursor.execute(query)
+
+        # Fetch all rows
+        rows = cursor.fetchall()
+
+        result = {row['IDZnamka']: row for row in rows}
+        return result
+ 
+    except Exception as e:
+        print("Error: ", e)
+        return {"Znamka": "failed", "Error": e}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Znamka": "failed"}    
+
+@app.get("/znamka/{znamkaid}")
+def get_znamka(znamkaid: int):
+    
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        # Run a SELECT query
+        query = "SELECT * FROM Znamka where IDZnamka = %s"
+        cursor.execute(query,(znamkaid,))
+
+        row = cursor.fetchone()
+
+        if row is not None:
+            print(row)
+            return {"IDZnamka": row[0], "NazivZnamke": row[1]}
+ 
+    except Exception as e:
+        print("Error: ", e)
+        return {"Znamke": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Znamke": "undefined"}
+
+@app.put("/posodobiznamko/")
+def posodobi_znamko(znamka: Znamka1):
+    userid = znamka.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Kraj SET NazivZnamke = %s WHERE IDZnamka = %s"
+        cursor.execute(query,(znamka.naziv,znamka.idznamka))
+        return {"Znamke": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Znamke": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Znamke": "unknown"}   
