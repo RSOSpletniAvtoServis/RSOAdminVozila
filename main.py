@@ -31,8 +31,8 @@ app.add_middleware(
 
 class Kraj(BaseModel):
     naziv: str
-    logitude: float
-    latitude: float
+    logitude: str
+    latitude: str
     uniqueid: str
 
 @app.get("/")
