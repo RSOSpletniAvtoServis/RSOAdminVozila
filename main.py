@@ -61,7 +61,7 @@ def dodajKraj(kraj: Kraj):
   
     except Exception as e:
         print("Error: ", e)
-        return {Kraji": "failed"}
+        return {"Kraji": "failed"}
     finally:
         cursor.close()
         conn.close() 
