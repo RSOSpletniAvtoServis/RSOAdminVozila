@@ -80,7 +80,7 @@ def get_kraji():
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Kraj")
+                cursor.execute("SELECT IDKraj, NazivKraja FROM Kraj")
 
                 cols = [c[0] for c in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor]
@@ -173,7 +173,7 @@ def get_znamke():
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Znamka")
+                cursor.execute("SELECT IDZnamka, NazivZnamke FROM Znamka")
 
                 cols = [c[0] for c in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor]
