@@ -78,26 +78,16 @@ def dodajKraj(kraj: Kraj):
 @app.get("/kraji/")
 def get_kraji():
     try:
-        conn = pool.get_connection()
-        # Create a cursor
-        cursor = conn.cursor(dictionary=True)
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, name FROM Kraj")
 
-        # Run a SELECT query
-        query = "SELECT * FROM Kraj"
-        cursor.execute(query)
-
-        # Fetch all rows
-        rows = cursor.fetchall()
-
-        result = {row['IDKraj']: row for row in rows}
-        return result
+                cols = [c[0] for c in cursor.description]
+                return [dict(zip(cols, row)) for row in cursor]
  
     except Exception as e:
         print("Error: ", e)
         return {"Kraji": "failed", "Error": e}
-    finally:
-        cursor.close()
-        conn.close() 
     return {"Kraji": "failed"}    
 
 @app.get("/kraj/{krajid}")
