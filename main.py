@@ -148,7 +148,8 @@ def posodobi_kraj(kraj: Kraj1):
 
 
 
-# Za Znamke
+# Za Znamke zacetek
+
 class Znamka(BaseModel):
     naziv: str
     uniqueid: str
@@ -242,3 +243,105 @@ def posodobi_znamko(znamka: Znamka1):
         cursor.close()
         conn.close() 
     return {"Znamke": "unknown"}   
+    
+# Za znamke konec
+
+# Za modele zacetek 
+
+class Model(BaseModel):
+    naziv: str
+    idznamka: str
+    uniqueid: str
+
+class Model1(BaseModel):
+    idmodel: str
+    naziv: str
+    idznamka: str
+    uniqueid: str
+
+@app.post("/dodajmodel/")
+def dodajModel(model: Model):
+    userid = model.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "INSERT INTO Model(NazivModel,IDZnamka) VALUES (%s,%s)"
+        cursor.execute(query,(model.naziv,model.idznamka))
+        return {"Model": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Model": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Model": "unknown"}   
+
+@app.get("/modeli/{idznamka}")
+def get_modeli(idznamka: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDModel, NazivModel, IDZnamka FROM Model WHERE IDZnamka = %s",(idznamka,)
+                )
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return [
+            {"IDModel": row[0], "NazivModel": row[1], "IDZnamka": row[2]}
+            for row in rows
+        ]
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Model": "failed"}    
+
+
+@app.get("/model/{modelid}")
+def get_model(modelid: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDModel, NazivModel, IDZnamka FROM Znamka WHERE IDModel = %s",
+                    (modelid,)
+                )
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Znamka not found")
+
+                return {"IDModel": row[0], "NazivModel": row[1], "IDZnamka": row[2]}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Model": "undefined"}
+
+
+@app.put("/posodobimodel/")
+def posodobi_model(model: Model1):
+    userid = model.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Model SET NazivModel = %s, IDZnamka = %s WHERE IDModel = %s"
+        cursor.execute(query,(model.naziv,model.idznamka,model.idmodel))
+        return {"Model": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Model": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Model": "unknown"}
+
+# Za modele konec
