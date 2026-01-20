@@ -1,7 +1,7 @@
 from typing import Union
 
 from fastapi import FastAPI
-
+from fastapi import HTTPException
 import mysql.connector
 from mysql.connector import pooling
 from pydantic import BaseModel
@@ -80,39 +80,50 @@ def get_kraji():
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Kraj")
+                cursor.execute(
+                    "SELECT IDKraj, NazivKraja, Longitude, Latitude FROM Kraj"
+                )
 
                 cols = [c[0] for c in cursor.description]
-                return [dict(zip(cols, row)) for row in cursor]
- 
+                rows = cursor.fetchall()   # ⬅️ important
+
+        return [dict(zip(cols, row)) for row in rows]
+
     except Exception as e:
-        print("Error: ", e)
-        return {"Kraji": "failed", "Error": e}
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
     return {"Kraji": "failed"}    
+
 
 @app.get("/kraj/{krajid}")
 def get_kraj(krajid: int):
-    
+
     try:
-        conn = pool.get_connection()
-        # Create a cursor
-        cursor = conn.cursor()
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDKraj, NazivKraja, Longitude, Latitude "
+                    "FROM Kraj WHERE IDKraj = %s",
+                    (krajid,)
+                )
 
-        # Run a SELECT query
-        query = "SELECT * FROM Kraj where IDKraj = %s"
-        cursor.execute(query,(krajid,))
+                row = cursor.fetchone()
 
-        row = cursor.fetchone()
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Kraj not found")
 
-        if row is not None:
-            print(row)
-            return {"IDKraj": row[0], "NazivKraja": row[1], "Longitude": row[2], "Latitude": row[3]}
- 
+                return {
+                    "IDKraj": row[0],
+                    "NazivKraja": row[1],
+                    "Longitude": row[2],
+                    "Latitude": row[3],
+                }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        print("Error: ", e)
-    finally:
-        cursor.close()
-        conn.close() 
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
     return {"Kraji": "undefined"}
 
 @app.put("/posodobikraj/")
@@ -173,40 +184,43 @@ def get_znamke():
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Znamka")
-
-                cols = [c[0] for c in cursor.description]
-                return [dict(zip(cols, row)) for row in cursor]
- 
+                cursor.execute(
+                    "SELECT IDZnamka, NazivZnamke FROM Znamka"
+                )
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return [
+            {"IDZnamka": row[0], "NazivZnamke": row[1]}
+            for row in rows
+        ]
     except Exception as e:
-        print("Error: ", e)
-        return {"Znamka": "failed", "Error": e}
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
     return {"Znamka": "failed"}    
+
 
 @app.get("/znamka/{znamkaid}")
 def get_znamka(znamkaid: int):
-    
     try:
-        conn = pool.get_connection()
-        # Create a cursor
-        cursor = conn.cursor()
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDZnamka, NazivZnamke FROM Znamka WHERE IDZnamka = %s",
+                    (znamkaid,)
+                )
 
-        # Run a SELECT query
-        query = "SELECT * FROM Znamka where IDZnamka = %s"
-        cursor.execute(query,(znamkaid,))
+                row = cursor.fetchone()
 
-        row = cursor.fetchone()
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Znamka not found")
 
-        if row is not None:
-            print(row)
-            return {"IDZnamka": row[0], "NazivZnamke": row[1]}
- 
+                return {"IDZnamka": row[0], "NazivZnamke": row[1]}
+
+    except HTTPException:
+        raise
     except Exception as e:
-        print("Error: ", e)
-        return {"Znamke": "failed"}
-    finally:
-        cursor.close()
-        conn.close() 
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
     return {"Znamke": "undefined"}
 
 @app.put("/posodobiznamko/")
