@@ -305,7 +305,7 @@ def get_model(modelid: int):
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT IDModel, NazivModel, IDZnamka FROM Znamka WHERE IDModel = %s",
+                    "SELECT IDModel, NazivModel, IDZnamka FROM Model WHERE IDModel = %s",
                     (modelid,)
                 )
 
