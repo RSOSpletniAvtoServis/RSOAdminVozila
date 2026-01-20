@@ -80,7 +80,7 @@ def get_kraji():
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT IDKraj, NazivKraja FROM Kraj")
+                cursor.execute("SELECT IDKraj, NazivKraja, Longitude, Latitude FROM Kraj")
 
                 cols = [c[0] for c in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor]
@@ -181,9 +181,6 @@ def get_znamke():
     except Exception as e:
         print("Error: ", e)
         return {"Znamka": "failed", "Error": e}
-    finally:
-        cursor.close()
-        conn.close() 
     return {"Znamka": "failed"}    
 
 @app.get("/znamka/{znamkaid}")
