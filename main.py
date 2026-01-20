@@ -171,19 +171,12 @@ def dodajZnamko(znamka: Znamka):
 @app.get("/znamke/")
 def get_znamke():
     try:
-        conn = pool.get_connection()
-        # Create a cursor
-        cursor = conn.cursor(dictionary=True)
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id, name FROM Znamka")
 
-        # Run a SELECT query
-        query = "SELECT * FROM Znamka"
-        cursor.execute(query)
-
-        # Fetch all rows
-        rows = cursor.fetchall()
-
-        result = {row['IDZnamka']: row for row in rows}
-        return result
+                cols = [c[0] for c in cursor.description]
+                return [dict(zip(cols, row)) for row in cursor]
  
     except Exception as e:
         print("Error: ", e)
