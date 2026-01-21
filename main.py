@@ -345,3 +345,103 @@ def posodobi_model(model: Model1):
     return {"Model": "unknown"}
 
 # Za modele konec
+
+# Za storitve začetek
+
+class Storitev(BaseModel):
+    naziv: str
+    uniqueid: str
+
+class Storitev1(BaseModel):
+    idstoritev: str
+    naziv: str
+    aktiven: str
+    uniqueid: str
+
+@app.post("/dodajstoritev/")
+def dodajStoritev(storitev: Storitev):
+    userid = storitev.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "INSERT INTO Storitev(NazivStoritve,Aktiven) VALUES (%s,%s)"
+        cursor.execute(query,(storitev.naziv,1))
+        return {"Storitev": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Storitev": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Storitev": "unknown"}   
+
+@app.get("/storitve/")
+def get_storitve():
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDStoritev, NazivStoritve, Aktiven FROM Storitev"
+                )
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return [
+            {"IDStoritev": row[0], "NazivStoritve": row[1], "Aktiven": row[2]}
+            for row in rows
+        ]
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Storitev": "failed"}    
+
+
+@app.get("/storitev/{storitevid}")
+def get_storitev(storitevid: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDStoritev, NazivStoritve, Aktiven FROM Storitev WHERE IDStoritev = %s",
+                    (storitevid,)
+                )
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Znamka not found")
+
+                return {"IDStoritev": row[0], "NazivStoritve": row[1], "Aktiven": row[2]}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Storitev": "undefined"}
+
+
+@app.put("/posodobistoritev/")
+def posodobi_storitev(storitev: Storitev1):
+    userid = storitev.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Storitev SET NazivStoritve = %s, Aktiven = %s WHERE IDStoritev = %s"
+        cursor.execute(query,(storitev.naziv,storitev.aktiven,storitev.idstoritev))
+        return {"Storitev": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Storitev": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Storitev": "unknown"}
+
+
+# Za storitve konec 
