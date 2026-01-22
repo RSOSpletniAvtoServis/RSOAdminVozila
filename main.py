@@ -445,3 +445,104 @@ def posodobi_storitev(storitev: Storitev1):
 
 
 # Za storitve konec 
+
+# Za statuse zacetek 
+
+class Status(BaseModel):
+    naziv: str
+    uniqueid: str
+
+class Status1(BaseModel):
+    idstatus: str
+    naziv: str
+    uniqueid: str
+
+@app.post("/dodajstatus/")
+def dodajStatus(status: Status):
+    userid = status.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "INSERT INTO Status(NazivStatusa) VALUES (%s)"
+        cursor.execute(query,(status.naziv,))
+        return {"Status": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Status": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Status": "unknown"}   
+
+@app.get("/statusi/")
+def get_statusi():
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDStatus, NazivStatusa FROM Status"
+                )
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return [
+            {"IDStatus": row[0], "NazivStatusa": row[1]}
+            for row in rows
+        ]
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Status": "failed"}    
+
+
+@app.get("/status/{statusid}")
+def get_status(statusid: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDStatus, NazivStatusa FROM Status WHERE IDStatus = %s",
+                    (statusid,)
+                )
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Znamka not found")
+
+                return {"IDStatus": row[0], "NazivStatusa": row[1]}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Status": "undefined"}
+
+
+@app.put("/posodobistatus/")
+def posodobi_status(status: Status1):
+    userid = status.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Status SET NazivStatusa = %s WHERE IDStatus = %s"
+        cursor.execute(query,(status.naziv,status.idstatus))
+        return {"Status": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Status": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Status": "unknown"}
+
+
+# Za statuse konec
+
+
