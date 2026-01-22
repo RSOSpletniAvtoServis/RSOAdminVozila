@@ -563,7 +563,8 @@ class Tennant(BaseModel):
 def dodajTennanta(tennant: Tennant):
     userid = tennant.uniqueid
     try:
-        db_name = validate_identifier(tennant.Naziv)
+        db_name = tennant.Naziv.replace(" ", "")
+        db_name = validate_identifier(db_name)
         conn = pool.get_connection()
         
         conn.autocommit = False
@@ -608,7 +609,7 @@ def dodajTennanta(tennant: Tennant):
         cursor.execute(query)
         
         query = f"INSERT INTO `{db_poslovalnice}`.AvtoServis(NazivAvtoServis) VALUES (%s)"
-        cursor.execute(query,(db_name,))
+        cursor.execute(query,(tennant.Naziv,))
         
         conn.commit()
         return {"Tennant": "passed"}
