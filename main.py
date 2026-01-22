@@ -7,6 +7,12 @@ from mysql.connector import pooling
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
+def validate_identifier(name: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
+        raise ValueError("Invalid database name")
+    return name
+
+
 app = FastAPI()
 try:
     pool = mysql.connector.pooling.MySQLConnectionPool(
@@ -544,5 +550,125 @@ def posodobi_status(status: Status1):
 
 
 # Za statuse konec
+
+#Za tennante začetek
+
+class Tennant(BaseModel):
+    naziv: str
+    uniqueid: str
+
+
+
+@app.post("/dodajtennanta/")
+def dodajTennanta(tennant: Tennant):
+    userid = tennant.uniqueid
+    try:
+        db_name = validate_identifier(tennant.Naziv)
+        conn = pool.get_connection()
+        
+        conn.autocommit = False
+        cursor = conn.cursor()
+        # Create a cursor
+        cursor = conn.cursor()
+        db_narocila = db_name + "Narocilo"
+        db_poslovalnice = db_name + "Poslovalnica"
+        #add record to tennantlookup
+        query = "INSERT INTO TennantLookup(NazivTennanta,TennantDBNarocila,TennantDBPoslovalnice) VALUES (%s,%s,%s)"
+        cursor.execute(query,(db_name,db_narocila,db_poslovalnice))
+        # Create db narocila for tennant
+        query = f"CREATE DATABASE `{db_narocila}`"
+        cursor.execute(query)
+ 
+        query = f"CREATE TABLE `{db_narocila}`.Narocilo LIKE RSOSceletonNarocila.Narocilo"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_narocila}`.Komunikacija LIKE RSOSceletonNarocila.Komunikacija"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_narocila}`.Ocena LIKE RSOSceletonNarocila.Ocena"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_narocila}`.Sporocilo LIKE RSOSceletonNarocila.Sporocilo"
+        cursor.execute(query)
+ 
+        # Create db Poslovalnice for tennant
+        query = f"CREATE DATABASE `{db_poslovalnice}`"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_poslovalnice}`.AvtoServis LIKE RSOSceletonPoslovalnice.AvtoServis"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_poslovalnice}`.Poslovalnica LIKE RSOSceletonPoslovalnice.Poslovalnica"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_poslovalnice}`.Ponuja LIKE RSOSceletonPoslovalnice.Ponuja"
+        cursor.execute(query)
+        
+        query = f"CREATE TABLE `{db_poslovalnice}`.Zaposleni LIKE RSOSceletonPoslovalnice.Zaposleni"
+        cursor.execute(query)
+        
+        query = f"INSERT INTO `{db_poslovalnice}`.AvtoServis(NazivAvtoServis) VALUES (%s)"
+        cursor.execute(query,(db_name,))
+        
+        conn.commit()
+        return {"Tennant": "passed"}
+  
+    except Exception as e:
+        conn.rollback()
+        print("Error: ", e)
+        return {"Tennant": "failed"}
+    finally:
+        conn.autocommit = True
+        cursor.close()
+        conn.close() 
+    return {"Tennant": "unknown"}   
+
+@app.get("/tennanti/")
+def get_tennanti():
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice FROM TennantLookup"
+                )
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return [
+            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3]}
+            for row in rows
+        ]
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Tennant": "failed"}    
+
+
+@app.get("/tenant/{tennantid}")
+def get_status(tennantid: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice FROM TennantLookup WHERE IDTennant = %s",
+                    (tennantid,)
+                )
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Znamka not found")
+
+                return {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3]}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Tennant": "undefined"}
+
+
+
+# Za tennante konec
 
 
