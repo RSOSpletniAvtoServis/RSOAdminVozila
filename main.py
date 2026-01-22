@@ -630,12 +630,12 @@ def get_tennanti():
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice FROM TennantLookup"
+                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup"
                 )
                 rows = cursor.fetchall()
         # Fixed columns → no need to read cursor.description
         return [
-            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3]}
+            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
             for row in rows
         ]
     except Exception as e:
@@ -650,7 +650,7 @@ def get_status(tennantid: int):
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice FROM TennantLookup WHERE IDTennant = %s",
+                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup WHERE IDTennant = %s",
                     (tennantid,)
                 )
 
@@ -659,7 +659,7 @@ def get_status(tennantid: int):
                 if row is None:
                     raise HTTPException(status_code=404, detail="Znamka not found")
 
-                return {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3]}
+                return {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
 
     except HTTPException:
         raise
