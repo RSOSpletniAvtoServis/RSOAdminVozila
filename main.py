@@ -570,7 +570,6 @@ def dodajTennanta(tennant: Tennant):
         conn.autocommit = False
         cursor = conn.cursor()
         # Create a cursor
-        cursor = conn.cursor()
         db_narocila = db_name + "Narocilo"
         db_poslovalnice = db_name + "Poslovalnica"
         #add record to tennantlookup
