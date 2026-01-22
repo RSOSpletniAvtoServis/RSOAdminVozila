@@ -6,6 +6,7 @@ import mysql.connector
 from mysql.connector import pooling
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import re
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
