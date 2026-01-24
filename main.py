@@ -696,10 +696,22 @@ def posodobi_vodjo(vodja: Vodja1):
         query = "UPDATE  SET IDVodja = %s WHERE IDTennant = %s"
         cursor.execute(query,(vodja.idvodja,vodja.idtennant))
   
-        data = {"id": id, "naziv": naziv}
+        data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
         response = requests.post(f"{SERVICE_UPOPRI_URL}/dodelivodjo/", json=data, timeout=5)
         response.raise_for_status()  # Raise exception for HTTP errors  
-  
+        result = response.json()
+
+        # Access the "Vodja" field
+        status = result.get("Vodja")  # "passed" or "failed"
+        print("Vodja status:", status)
+
+        if status == "passed":
+            print("Vodjo successfully assigned")
+        else:
+            print("Failed to assign vodjo:", result.get("Opis")) 
+
+        conn.rollback()
+        return {"Vodja": "failed"}
         conn.commit()
     except Exception as e:
         print("Error: ", e)
