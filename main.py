@@ -693,7 +693,7 @@ def posodobi_vodjo(vodja: Vodja1):
         # Create a cursor
         cursor = conn.cursor()
 
-        query = "UPDATE  SET IDVodja = %s WHERE IDTennant = %s"
+        query = "UPDATE TennantLookup SET IDVodja = %s WHERE IDTennant = %s"
         cursor.execute(query,(vodja.idvodja,vodja.idtennant))
   
         data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
