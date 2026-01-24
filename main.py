@@ -7,6 +7,12 @@ from mysql.connector import pooling
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import re
+import httpx
+import os
+import requests
+
+SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
+
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -624,8 +630,12 @@ def dodajTennanta(tennant: Tennant):
         conn.close() 
     return {"Tennant": "unknown"}   
 
-@app.get("/tennanti/")
-def get_tennanti():
+class VodjaProst(BaseModel):
+    uniqueid: str
+
+@app.post("/tennanti/")
+def get_tennanti(vodja: VodjaProst):
+    userid = vodja.uniqueid
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
@@ -645,7 +655,7 @@ def get_tennanti():
 
 
 @app.get("/tenant/{tennantid}")
-def get_status(tennantid: int):
+def get_tennant(tennantid: int):
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
@@ -668,7 +678,37 @@ def get_status(tennantid: int):
         raise HTTPException(status_code=500, detail="Database error")
     return {"Tennant": "undefined"}
 
+class Vodja1(BaseModel):
+    idvodja: str
+    idtennant: str
+    uniqueid: str
 
+
+@app.put("/posodobivodjo/")
+def posodobi_vodjo(vodja: Vodja1):
+    userid = vodja.uniqueid
+    try:
+        conn = pool.get_connection()
+        conn.autocommit = False
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE  SET IDVodja = %s WHERE IDTennant = %s"
+        cursor.execute(query,(vodja.idvodja,vodja.idtennant))
+  
+        data = {"id": id, "naziv": naziv}
+        response = requests.post(f"{SERVICE_UPOPRI_URL}/dodelivodjo/", json=data, timeout=5)
+        response.raise_for_status()  # Raise exception for HTTP errors  
+  
+        conn.commit()
+    except Exception as e:
+        print("Error: ", e)
+        return {"Vodja": "failed", "Error": e}
+    finally:
+        conn.autocommit = True
+        cursor.close()
+        conn.close() 
+    return {"Vodja": "unknown"}
 
 # Za tennante konec
 
