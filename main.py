@@ -697,7 +697,7 @@ def posodobi_vodjo(vodja: Vodja1):
         cursor.execute(query,(vodja.idvodja,vodja.idtennant))
   
         data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
-        response = requests.post(f"{SERVICE_UPOPRI_URL}/dodelivodjo/", json=data, timeout=5)
+        response = requests.put(f"{SERVICE_UPOPRI_URL}/dodelivodjo/", json=data, timeout=5)
         response.raise_for_status()  # Raise exception for HTTP errors  
         result = response.json()
 
@@ -716,6 +716,7 @@ def posodobi_vodjo(vodja: Vodja1):
     except Exception as e:
         print("Error: ", e)
         return {"Vodja": "failed", "Error": e}
+        conn.rollback()
     finally:
         conn.autocommit = True
         cursor.close()
