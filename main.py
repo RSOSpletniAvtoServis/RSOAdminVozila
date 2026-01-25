@@ -714,9 +714,10 @@ def posodobi_vodjo(vodja: Vodja1):
         return {"Vodja": "failed"}
         conn.commit()
     except Exception as e:
+        conn.rollback()
         print("Error: ", e)
         return {"Vodja": "failed", "Error": e}
-        conn.rollback()
+        
     finally:
         conn.autocommit = True
         cursor.close()
