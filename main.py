@@ -691,7 +691,7 @@ def posodobi_vodjo(vodja: Vodja1):
         conn = pool.get_connection()
         # Create a cursor
         cursor = conn.cursor()
-
+        
         query = "UPDATE TennantLookup SET IDVodja = %s WHERE IDTennant = %s"
         cursor.execute(query,(vodja.idvodja,vodja.idtennant))
   
@@ -738,7 +738,7 @@ def odstrani_vodjo(vodja: Vodja1):
         conn.autocommit = False
         # Create a cursor
         cursor = conn.cursor()
-
+        cursor.execute("START TRANSACTION")
         query = "UPDATE TennantLookup SET IDVodja = NULL WHERE IDTennant = %s"
         cursor.execute(query,(vodja.idtennant,))
   
