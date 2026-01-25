@@ -664,7 +664,7 @@ def get_tennanti(vodja: VodjaProst):
                     ]
                 else:
                     result = response.json()
-                    print(result)"""
+                    print(result)
                     
                     cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                     rows = cursor.fetchall()
