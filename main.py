@@ -649,20 +649,20 @@ def get_tennanti(vodja: VodjaProst):
                 if row[0] is not None
                 })
                 print(vodja_ids)
-                
+                /*
                 data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
                 response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
                 #response.raise_for_status()  # Raise exception for HTTP errors  
                 result = response.json()
-                print(result)
+                print(result)*/
                 
                 cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                 rows = cursor.fetchall()
-        # Fixed columns → no need to read cursor.description
-        return [
-            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
-            for row in rows
-        ]
+                # Fixed columns → no need to read cursor.description
+                return [
+                    {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
+                    for row in rows
+                ]
     except Exception as e:
         print("DB error:", e)
         #raise HTTPException(status_code=500, detail="Database error")
