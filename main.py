@@ -640,9 +640,17 @@ def get_tennanti(vodja: VodjaProst):
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    "SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup"
-                )
+                
+                cursor.execute("SELECT IDVodja FROM TennantLookup WHERE IDVodja IS NOT NULL")
+                rows = cursor.fetchall()
+                vodja_ids = list({
+                row["IDVodja"]
+                for row in rows
+                if row["IDVodja"] is not None
+                })
+                print(vodja_ids)
+                
+                cursor.execute("SELECT IDTennant, NazivTennant  a, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                 rows = cursor.fetchall()
         # Fixed columns → no need to read cursor.description
         return [
