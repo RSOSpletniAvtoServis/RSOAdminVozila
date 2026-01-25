@@ -725,10 +725,56 @@ def posodobi_vodjo(vodja: Vodja1):
         return {"Vodja": "failed", "Error": e}
         
     finally:
-        conn.autocommit = True
         cursor.close()
         conn.close() 
     return {"Vodja": "unknown"}
+
+
+@app.delete("/odstranivodjo/")
+def odstrani_vodjo(vodja: Vodja1):
+    userid = vodja.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE TennantLookup SET IDVodja = NULL WHERE IDTennant = %s"
+        cursor.execute(query,(vodja.idtennant,))
+  
+        data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
+        response = requests.put(f"{SERVICE_UPOPRI_URL}/odstranivodjo/", json=data, timeout=5)
+        response.raise_for_status()  # Raise exception for HTTP errors  
+        result = response.json()
+
+        # Access the "Vodja" field
+        status = result.get("Vodja")  # "passed" or "failed"
+        print("Vodja status:", status)
+
+        if status == "passed":
+            print("Vodja successfully assigned") 
+            sql = "SELECT IDTennant, TennantDBPoslovalnice FROM TennantLookup WHERE IDTennant = %s"
+            cursor.execute(sql, (vodja.idtennant,))
+            row = cursor.fetchone()
+            dbposlovalnice = row[1]
+            sql = "UPDATE "+dbposlovalnice+".AvtoServis SET IDVodja = NULL"
+            cursor.execute(sql)
+            return {"Vodja": "passed"}
+        else:
+            query = "UPDATE TennantLookup SET IDVodja = %s WHERE IDTennant = %s"
+            cursor.execute(query,(vodja.idvodja,vodja.idtennant))
+            print("Failed to assign vodjo:", result.get("Opis"))
+            return {"Vodja": "failed"}
+                  
+        return {"Vodja": "failed"}
+    except Exception as e:
+        print("Error: ", e)
+        return {"Vodja": "failed", "Error": e}
+        
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Vodja": "unknown"}
+
 
 # Za tennante konec
 
