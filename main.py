@@ -650,7 +650,7 @@ def get_tennanti(vodja: VodjaProst):
                 })
                 print(vodja_ids)
                 
-                cursor.execute("SELECT IDTennant, NazivTennant  a, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                 rows = cursor.fetchall()
         # Fixed columns → no need to read cursor.description
         return [
