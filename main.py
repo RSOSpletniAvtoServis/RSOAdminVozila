@@ -649,28 +649,40 @@ def get_tennanti(vodja: VodjaProst):
                 if row[0] is not None
                 })
                 print(vodja_ids)
-                
-                data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
-                response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
-                #response.raise_for_status()  # Raise exception for HTTP errors  
-                print(response)
-                if "application/json" not in response.headers.get("Content-Type", ""):
+                fail = 0
+                try:
+                    data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
+                    response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
+                    #response.raise_for_status()  # Raise exception for HTTP errors  
+                    print(response)
+                    if "application/json" not in response.headers.get("Content-Type", ""):
+                        cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                        rows = cursor.fetchall()
+                        # Fixed columns → no need to read cursor.description
+                        return [
+                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
+                            for row in rows
+                        ]
+                    else:
+                        result = response.json()
+                        print(result)
+                        
+                        cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                        rows = cursor.fetchall()
+                        # Fixed columns → no need to read cursor.description
+                        return [
+                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": result.get(str(row[4]))}
+                            for row in rows
+                        ]
+                except Exception as e:
+                    print("Prislo je do napake: ", e)
+                    fail = 1
+                if fail == 1:
                     cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                     rows = cursor.fetchall()
                     # Fixed columns → no need to read cursor.description
                     return [
                         {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
-                        for row in rows
-                    ]
-                else:
-                    result = response.json()
-                    print(result)
-                    
-                    cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
-                    rows = cursor.fetchall()
-                    # Fixed columns → no need to read cursor.description
-                    return [
-                        {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": result.get(str(row[4]))}
                         for row in rows
                     ]
     except Exception as e:
