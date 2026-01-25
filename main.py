@@ -87,7 +87,42 @@ def dodajKraj(kraj: Kraj):
         conn.close() 
     return {"Kraji": "unknown"}    
     
+ 
+# zacetek izbrani kraji
+
+class Kraji2(BaseModel):
+    ids: List[int]
+    uniqueid: str
+
+@app.post("/izbranikraji/")
+def get_izbranikraji(kraji2: Kraji2):
+    print(kraji2.ids)     # list[int]
+    print(kraji2.uniqueid)  # str
+    ids_string = "("
+    idmiddle = ",".join(str(i) for i in kraji2.ids)
+    full_string = "(" + idmiddle + ")"
+    print(ids_string)
+    print(idmiddle)
+    print(full_string)
     
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT IDKraj, NazivKraja FROM Kraj WHERE IDKraj IN " + full_string
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return {row[0]: row[1] for row in rows}
+
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+        return {"Kraj2": "failed"} 
+    return {"Kraj2": "failed"}
+
+#konec izbrani kraji
+
+ 
 @app.get("/kraji/")
 def get_kraji():
     try:
@@ -110,7 +145,6 @@ def get_kraji():
 
 @app.get("/kraj/{krajid}")
 def get_kraj(krajid: int):
-
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
