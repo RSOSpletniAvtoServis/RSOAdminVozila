@@ -705,11 +705,19 @@ def posodobi_vodjo(vodja: Vodja1):
         print("Vodja status:", status)
 
         if status == "passed":
-            print("Vodjo successfully assigned") 
+            print("Vodja successfully assigned") 
+            sql = "SELECT IDTennant, TennantDBPoslovalnice FROM TennantLookup WHERE IDTennant = %s"
+            cursor.execute(sql, (vodja.idtennant,))
+            row = cursor.fetchone()
+            dbposlovalnice = row[1]
+            sql = "UPDATE "+dbposlovalnice+".AvtoServis SET IDVodja = %s"
+            cursor.execute(sql,(vodja.idvodja,))
+            return {"Vodja": "passed"}
         else:
             query = "UPDATE TennantLookup SET IDVodja = NULL WHERE IDTennant = %s"
             cursor.execute(query,(vodja.idtennant,))
-            print("Failed to assign vodjo:", result.get("Opis")) 
+            print("Failed to assign vodjo:", result.get("Opis"))
+            return {"Vodja": "failed"}
                   
         return {"Vodja": "failed"}
     except Exception as e:
