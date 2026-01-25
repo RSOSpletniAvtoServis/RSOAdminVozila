@@ -644,9 +644,9 @@ def get_tennanti(vodja: VodjaProst):
                 cursor.execute("SELECT IDVodja FROM TennantLookup WHERE IDVodja IS NOT NULL")
                 rows = cursor.fetchall()
                 vodja_ids = list({
-                row["IDVodja"]
+                row[0]
                 for row in rows
-                if row["IDVodja"] is not None
+                if row[0] is not None
                 })
                 print(vodja_ids)
                 
