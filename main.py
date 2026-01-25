@@ -707,12 +707,12 @@ def posodobi_vodjo(vodja: Vodja1):
 
         if status == "passed":
             print("Vodjo successfully assigned")
+            conn.commit()  
         else:
             print("Failed to assign vodjo:", result.get("Opis")) 
-
-        conn.rollback()
+            conn.rollback()
+                  
         return {"Vodja": "failed"}
-        conn.commit()
     except Exception as e:
         conn.rollback()
         print("Error: ", e)
