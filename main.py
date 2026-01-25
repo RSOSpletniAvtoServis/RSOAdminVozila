@@ -10,6 +10,7 @@ import re
 import httpx
 import os
 import requests
+from typing import List
 
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
 
