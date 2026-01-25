@@ -650,6 +650,12 @@ def get_tennanti(vodja: VodjaProst):
                 })
                 print(vodja_ids)
                 
+                data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
+                response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
+                response.raise_for_status()  # Raise exception for HTTP errors  
+                result = response.json()
+                print(result)
+                
                 cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
                 rows = cursor.fetchall()
         # Fixed columns → no need to read cursor.description
