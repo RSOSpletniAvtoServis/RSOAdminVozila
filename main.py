@@ -576,6 +576,7 @@ def dodajTennanta(tennant: Tennant):
         
         conn.autocommit = False
         cursor = conn.cursor()
+        cursor.execute("START TRANSACTION")
         # Create a cursor
         db_narocila = db_name + "Narocilo"
         db_poslovalnice = db_name + "Poslovalnica"
@@ -743,7 +744,7 @@ def odstrani_vodjo(vodja: Vodja1):
         cursor.execute(query,(vodja.idtennant,))
   
         data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
-        response = requests.put(f"{SERVICE_UPOPRI_URL}/odstranivodjo/", json=data, timeout=5)
+        response = requests.delete(f"{SERVICE_UPOPRI_URL}/odstranivodjo/", json=data, timeout=5)
         response.raise_for_status()  # Raise exception for HTTP errors  
         result = response.json()
 
