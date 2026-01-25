@@ -652,7 +652,7 @@ def get_tennanti(vodja: VodjaProst):
                 
                 data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
                 response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
-                response.raise_for_status()  # Raise exception for HTTP errors  
+                #response.raise_for_status()  # Raise exception for HTTP errors  
                 result = response.json()
                 print(result)
                 
@@ -665,7 +665,7 @@ def get_tennanti(vodja: VodjaProst):
         ]
     except Exception as e:
         print("DB error:", e)
-        raise HTTPException(status_code=500, detail="Database error")
+        #raise HTTPException(status_code=500, detail="Database error")
     return {"Tennant": "failed"}    
 
 
