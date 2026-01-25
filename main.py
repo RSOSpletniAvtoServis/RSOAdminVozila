@@ -687,42 +687,55 @@ class Vodja1(BaseModel):
 @app.put("/posodobivodjo/")
 def posodobi_vodjo(vodja: Vodja1):
     userid = vodja.uniqueid
+    conn = None
+    cursor = None
     try:
         conn = pool.get_connection()
         conn.autocommit = False
-        # Create a cursor
         cursor = conn.cursor()
 
+        # Update local DB
         query = "UPDATE TennantLookup SET IDVodja = %s WHERE IDTennant = %s"
-        cursor.execute(query,(vodja.idvodja,vodja.idtennant))
-  
-        data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
-        response = requests.put(f"{SERVICE_UPOPRI_URL}/dodelivodjo/", json=data, timeout=5)
-        response.raise_for_status()  # Raise exception for HTTP errors  
+        cursor.execute(query, (vodja.idvodja, vodja.idtennant))
+
+        # Call remote microservice
+        data = {
+            "idvodja": vodja.idvodja,
+            "idtennant": vodja.idtennant,
+            "uniqueid": vodja.uniqueid
+        }
+
+        response = requests.put(
+            f"{SERVICE_UPOPRI_URL}/dodelivodjo/",
+            json=data,
+            timeout=5
+        )
+        response.raise_for_status()
         result = response.json()
 
-        # Access the "Vodja" field
         status = result.get("Vodja")  # "passed" or "failed"
-        print("Vodja status:", status)
 
         if status == "passed":
-            print("Vodjo successfully assigned")
-            conn.commit()  
+            # Everything OK → commit
+            conn.commit()
+            return {"Vodja": "passed"}
         else:
-            print("Failed to assign vodjo:", result.get("Opis")) 
+            # Something failed → rollback
             conn.rollback()
-                  
-        return {"Vodja": "failed"}
+            return {"Vodja": "failed", "Opis": result.get("Opis")}
+
     except Exception as e:
-        conn.rollback()
-        print("Error: ", e)
-        return {"Vodja": "failed", "Error": e}
-        
+        if conn:
+            conn.rollback()
+        print("Error:", e)
+        return {"Vodja": "failed", "Error": str(e)}
+
     finally:
-        conn.autocommit = True
-        cursor.close()
-        conn.close() 
-    return {"Vodja": "unknown"}
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.autocommit = True
+            conn.close()
 
 # Za tennante konec
 
