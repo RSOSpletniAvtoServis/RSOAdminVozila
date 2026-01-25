@@ -660,7 +660,7 @@ def get_tennanti(vodja: VodjaProst):
                         rows = cursor.fetchall()
                         # Fixed columns → no need to read cursor.description
                         return [
-                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
+                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": None}
                             for row in rows
                         ]
                     else:
@@ -682,7 +682,7 @@ def get_tennanti(vodja: VodjaProst):
                     rows = cursor.fetchall()
                     # Fixed columns → no need to read cursor.description
                     return [
-                        {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4]}
+                        {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": None}
                         for row in rows
                     ]
     except Exception as e:
