@@ -735,6 +735,7 @@ def odstrani_vodjo(vodja: Vodja1):
     userid = vodja.uniqueid
     try:
         conn = pool.get_connection()
+        conn.autocommit = False
         # Create a cursor
         cursor = conn.cursor()
 
@@ -742,7 +743,7 @@ def odstrani_vodjo(vodja: Vodja1):
         cursor.execute(query,(vodja.idtennant,))
   
         data = {"idvodja": vodja.idvodja, "idtennant": vodja.idtennant, "uniqueid": vodja.uniqueid}
-        response = requests.delete(f"{SERVICE_UPOPRI_URL}/odstranivodjo/", json=data, timeout=5)
+        response = requests.put(f"{SERVICE_UPOPRI_URL}/odstranivodjo/", json=data, timeout=5)
         response.raise_for_status()  # Raise exception for HTTP errors  
         result = response.json()
 
@@ -758,19 +759,20 @@ def odstrani_vodjo(vodja: Vodja1):
             dbposlovalnice = row[1]
             sql = "UPDATE "+dbposlovalnice+".AvtoServis SET IDVodja = NULL"
             cursor.execute(sql)
+            conn.commit()
             return {"Vodja": "passed"}
         else:
-            query = "UPDATE TennantLookup SET IDVodja = %s WHERE IDTennant = %s"
-            cursor.execute(query,(vodja.idvodja,vodja.idtennant))
-            print("Failed to assign vodjo:", result.get("Opis"))
+            conn.rollback()
             return {"Vodja": "failed"}
                   
         return {"Vodja": "failed"}
     except Exception as e:
+        conn.rollback()
         print("Error: ", e)
         return {"Vodja": "failed", "Error": e}
         
     finally:
+        conn.autocommit = True
         cursor.close()
         conn.close() 
     return {"Vodja": "unknown"}
