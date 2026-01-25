@@ -649,8 +649,9 @@ def get_tennanti(vodja: VodjaProst):
                 if row[0] is not None
                 })
                 print(vodja_ids)
-                """
+                
                 data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
+                """
                 response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
                 #response.raise_for_status()  # Raise exception for HTTP errors  
                 result = response.json()
