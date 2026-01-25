@@ -653,7 +653,7 @@ def get_tennanti(vodja: VodjaProst):
                 data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
                 response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
                 #response.raise_for_status()  # Raise exception for HTTP errors  
-                print(result)
+                print(response)
                 """
                 result = response.json()
                 print(result)"""
