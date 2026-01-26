@@ -897,7 +897,7 @@ class Vozilo(BaseModel):
     uniqueid: str
 
 @app.post("/dodajvozilo/")
-def dodajKraj(voz: Vozilo):
+def dodajVozilo(voz: Vozilo):
     userid = voz.uniqueid
     try:
         conn = pool.get_connection()
@@ -947,7 +947,7 @@ class Voz3(BaseModel):
     iduporabnik: str
     uniqueid: str
 
-@app.get("/vozilo/")
+@app.post("/vozilo/")
 def get_vozilo(voz: Voz3):
     try:
         with pool.get_connection() as conn:
