@@ -883,7 +883,132 @@ def odstrani_vodjo(vodja: Vodja1):
         conn.close() 
     return {"Vodja": "unknown"}
 
-
 # Za tennante konec
+
+# Zacetek vozila
+
+class Vozilo(BaseModel):
+    idznamka: str
+    idmodel: str
+    iduporabnik: str
+    stsasije: str
+    leto: str
+    km: str
+    uniqueid: str
+
+@app.post("/dodajvozilo/")
+def dodajKraj(voz: Vozilo):
+    userid = voz.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "INSERT INTO Vozilo(StevilkaSasije,LetoPrveRegistracije,KonjskaMoc,IDModel,IDZnamka,IDUporabnik,Aktiven) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+        cursor.execute(query,(voz.stsasije,voz.leto,voz.km,vozidmodel,voz.idznamka,voz.iduporabnik,1))
+        return {"Vozilo": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Vozilo": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Vozilo": "unknown"}    
+    
+ 
+# zacetek izbrani kraji
+
+class Voz2(BaseModel):
+    iduporabnik: str
+    uniqueid: str
+
+@app.post("/vozila/")
+def get_vozila(voz: Voz2):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT v.StevilkaSasije, v.LetoPrveRegistracije, v.KonjskaMoc, v.IDModel m.NazivModel, v.IDZnamka, z.NazivZnamke, v.Aktiven FROM Vozilo v, Znamka z, Model m WHERE v.IDModel = m.IDModel AND z.IDZnamka = v.IDZnamka"
+                cursor.execute(sql)
+
+                cols = [c[0] for c in cursor.description]
+                rows = cursor.fetchall()   # ⬅️ important
+
+        return [dict(zip(cols, row)) for row in rows]
+
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Vozilo": "failed"}    
+
+
+class Voz3(BaseModel):
+    stsasije: str
+    iduporabnik: str
+    uniqueid: str
+
+@app.get("/vozilo/")
+def get_vozilo(voz: Voz3):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT v.StevilkaSasije, v.LetoPrveRegistracije, v.KonjskaMoc, v.IDModel, m.NazivModel, v.IDZnamka, z.NazivZnamke, v.Aktiven FROM Vozilo v, Znamka z, Model m WHERE v.IDModel = m.IDModel AND z.IDZnamka = v.IDZnamka AND v.StevilkaSasije = %s"
+                cursor.execute(sql,(voz.stsasije,))
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Kraj not found")
+
+                return {
+                    "StevilkaSasije": row[0],
+                    "LetoPrveRegistracije": row[1],
+                    "KonjskaMoc": row[2],
+                    "IDModel": row[3],
+                    "NazivModel": row[4],
+                    "IDZnamka": row[5],
+                    "NazivZnamke": row[6],
+                    "Aktiven": row[7]
+                    
+                }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Vozilo": "undefined"}
+
+class VoziloPos(BaseModel):
+    stsasije: str
+    leto: str
+    km: str
+    aktiven: str
+    iduporabnik: str
+    uniqueid: str
+
+@app.put("/posodobivozilo/")
+def posodobi_vozilo(voz: VoziloPos):
+    userid = vozj.uniqueid
+    try:
+        conn = pool.get_connection()
+        # Create a cursor
+        cursor = conn.cursor()
+
+        query = "UPDATE Vozilo SET LetoPrveRegistracije = %s, KonjskaMoc = %s, Aktiven = %s WHERE StevilkaSasije = %s"
+        cursor.execute(query,(voz.leto,voz.km,voz.aktiven,voz.stsasije))
+        return {"Vozilo": "passed"}
+  
+    except Exception as e:
+        print("Error: ", e)
+        return {"Vozilo": "failed"}
+    finally:
+        cursor.close()
+        conn.close() 
+    return {"Vozilo": "unknown"}
+
+
+# Konec vozila
+
 
 
