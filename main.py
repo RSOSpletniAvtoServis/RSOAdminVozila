@@ -905,7 +905,7 @@ def dodajKraj(voz: Vozilo):
         cursor = conn.cursor()
 
         query = "INSERT INTO Vozilo(StevilkaSasije,LetoPrveRegistracije,KonjskaMoc,IDModel,IDZnamka,IDUporabnik,Aktiven) VALUES (%s,%s,%s,%s,%s,%s,%s)"
-        cursor.execute(query,(voz.stsasije,voz.leto,voz.km,vozidmodel,voz.idznamka,voz.iduporabnik,1))
+        cursor.execute(query,(voz.stsasije,voz.leto,voz.km,voz.idmodel,voz.idznamka,voz.iduporabnik,1))
         return {"Vozilo": "passed"}
   
     except Exception as e:
