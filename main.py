@@ -989,7 +989,7 @@ class VoziloPos(BaseModel):
 
 @app.put("/posodobivozilo/")
 def posodobi_vozilo(voz: VoziloPos):
-    userid = vozj.uniqueid
+    userid = voz.uniqueid
     try:
         conn = pool.get_connection()
         # Create a cursor
