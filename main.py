@@ -928,8 +928,8 @@ def get_vozila(voz: Voz2):
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                sql = "SELECT v.StevilkaSasije, v.LetoPrveRegistracije, v.KonjskaMoc, v.IDModel m.NazivModel, v.IDZnamka, z.NazivZnamke, v.Aktiven FROM Vozilo v, Znamka z, Model m WHERE v.IDModel = m.IDModel AND z.IDZnamka = v.IDZnamka"
-                cursor.execute(sql)
+                sql = "SELECT v.StevilkaSasije, v.LetoPrveRegistracije, v.KonjskaMoc, v.IDModel m.NazivModel, v.IDZnamka, z.NazivZnamke, v.Aktiven FROM Vozilo v, Model m, Znamka z, Model m WHERE v.IDModel = m.IDModel AND z.IDZnamka = v.IDZnamka AND v.IDUporabnik = %s"
+                cursor.execute(sql,(voz.iduporabnik,))
 
                 cols = [c[0] for c in cursor.description]
                 rows = cursor.fetchall()   # ⬅️ important
