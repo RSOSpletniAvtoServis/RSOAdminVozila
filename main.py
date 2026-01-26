@@ -994,7 +994,10 @@ def posodobi_vozilo(voz: VoziloPos):
         conn = pool.get_connection()
         # Create a cursor
         cursor = conn.cursor()
-
+        
+        if voz.aktiven != '1':
+            voz.aktiven = '0'
+            
         query = "UPDATE Vozilo SET LetoPrveRegistracije = %s, KonjskaMoc = %s, Aktiven = %s WHERE StevilkaSasije = %s"
         cursor.execute(query,(voz.leto,voz.km,voz.aktiven,voz.stsasije))
         return {"Vozilo": "passed"}
