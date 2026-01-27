@@ -771,18 +771,15 @@ def get_tennants():
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 return [
-                        {"IDTennant": row[0], "NazivTennanta": row[1]}
-                        for row in rows
+                    {"IDTennant": row[0], "NazivTennanta": row[1]}
+                    for row in rows
                     ]
-                
-                except Exception as e:
-                    print("Prislo je do napake: ", e)
-                    fail = 1
-                    return {"Tennant": "failed"}
     except Exception as e:
         print("DB error:", e)
         #raise HTTPException(status_code=500, detail="Database error")
+        return {"Tennant": "failed"}
     return {"Tennant": "failed"}
+    
 
 # Konec funkcija za vse tennante
 
