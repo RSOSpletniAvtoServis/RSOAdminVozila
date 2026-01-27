@@ -1042,8 +1042,8 @@ class Vozila2(BaseModel):
 
 @app.post("/izbranavozila/")
 def get_izbranavozila(voz2: Vozila2):
-    print(kraji2.ids)     # list[int]
-    print(kraji2.uniqueid)  # str
+    print(voz2.ids)     # list[int]
+    print(voz2.uniqueid)  # str
     ids_string = "("
     idmiddle = ",".join(str(i) for i in voz.stsas)
     full_string = "(" + idmiddle + ")"
