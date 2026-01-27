@@ -1046,8 +1046,8 @@ def get_izbranavozila(voz2: Vozila2):
     print(voz2.stsas)     # list[int]
     print(voz2.uniqueid)  # str
     ids_string = "("
-    idmiddle = ",".join(str(i) for i in voz2.stsas)
-    full_string = "(" + idmiddle + ")"
+    idmiddle = "','".join(str(i) for i in voz2.stsas)
+    full_string = "('" + idmiddle + "')"
     print(ids_string)
     print(idmiddle)
     print(full_string)
