@@ -1038,6 +1038,7 @@ def posodobi_vozilo(voz: VoziloPos):
 
 class Vozila2(BaseModel):
     stsas: List[str]
+    iduporabnik: str
     uniqueid: str
 
 @app.post("/izbranavozila/")
@@ -1054,8 +1055,8 @@ def get_izbranavozila(voz2: Vozila2):
     try:
         with pool.get_connection() as conn:
             with conn.cursor() as cursor:
-                sql = "SELECT v.StevilkaSasije, v.IDZnamka, v.IDModel, z.NazivZnamke, m.NazivModel  FROM Vozilo v, Znamka z, Model m WHERE v.IDZnamka = z.IDZnamka AND v.IDModel = m.IDModel AND v.StevilkaSasije IN " + full_string
-                cursor.execute(sql)
+                sql = "SELECT v.StevilkaSasije, v.IDZnamka, v.IDModel, z.NazivZnamke, m.NazivModel  FROM Vozilo v, Znamka z, Model m WHERE v.IDZnamka = z.IDZnamka AND v.IDModel = m.IDModel AND v.IDUporabnik = %s AND v.StevilkaSasije IN " + full_string
+                cursor.execute(sql,(voz2.iduporabnik,))
                 rows = cursor.fetchall()
                 # Fixed columns → no need to read cursor.description
                 columns = [desc[0] for desc in cursor.description]
