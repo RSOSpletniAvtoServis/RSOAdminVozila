@@ -1036,6 +1036,37 @@ def posodobi_vozilo(voz: VoziloPos):
     return {"Vozilo": "unknown"}
 
 
+class Vozila2(BaseModel):
+    stsas: List[str]
+    uniqueid: str
+
+@app.post("/izbranavozila/")
+def get_izbranavozila(voz2: Vozila2):
+    print(kraji2.ids)     # list[int]
+    print(kraji2.uniqueid)  # str
+    ids_string = "("
+    idmiddle = ",".join(str(i) for i in voz.stsas)
+    full_string = "(" + idmiddle + ")"
+    print(ids_string)
+    print(idmiddle)
+    print(full_string)
+    
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT v.StevilkaSasije, v.IDZnamka, v.IDModel, z.NazivZnamke, m.NazivModel  FROM Vozilo v, Znamka z, Model m WHERE v.IDZnamka = z.IDZnamka AND v.IDModel = m.IDModel AND v.StevilkaSasije IN " + full_string
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+                # Fixed columns → no need to read cursor.description
+                columns = [desc[0] for desc in cursor.description]
+                return { row[0]: dict(zip(columns, row)) for row in rows}
+
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+        return {"Vozilo": "failed"} 
+    return {"Vozilo": "failed"}
+
 # Konec vozila
 
 
