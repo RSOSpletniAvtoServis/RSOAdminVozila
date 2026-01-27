@@ -760,6 +760,34 @@ def get_tennanti(vodja: VodjaProst):
     return {"Tennant": "failed"}    
 
 
+# Zacetek funkcija za vse tennante
+
+@app.get("/tennants/")
+def get_tennants():
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT IDTennant, NazivTennanta FROM TennantLookup"
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+                return [
+                        {"IDTennant": row[0], "NazivTennanta": row[1]}
+                        for row in rows
+                    ]
+                
+                except Exception as e:
+                    print("Prislo je do napake: ", e)
+                    fail = 1
+                    return {"Tennant": "failed"}
+    except Exception as e:
+        print("DB error:", e)
+        #raise HTTPException(status_code=500, detail="Database error")
+    return {"Tennant": "failed"}
+
+# Konec funkcija za vse tennante
+
+
+
 @app.get("/tenant/{tennantid}")
 def get_tennant(tennantid: int):
     try:
