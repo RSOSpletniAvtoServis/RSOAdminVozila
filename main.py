@@ -208,7 +208,6 @@ def get_vreme(krajid: int):
 
 def dobivreme(latitude,longitude):
     try:
-        data = {"iduporabnik": iduporabnik, "uniqueid": uniqueid}
         response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", json=data, timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
@@ -217,7 +216,7 @@ def dobivreme(latitude,longitude):
         else:
             result = response.json()
             print(result)
-            return {"Vreme": "passed"}
+            return result
     except Exception as e:
         print("Prislo je do napake: ", e)
         return {"Vreme": "failed", "Error": e}
