@@ -11,6 +11,7 @@ import httpx
 import os
 import requests
 from typing import List
+import time
 
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
 EXTERNAL_API_URL =  os.getenv("EXTERNAL_API_URL","https://api.open-meteo.com/v1/forecast?")
@@ -202,31 +203,36 @@ def get_vreme(krajid: int):
 # Zacetek pridobivanja vremena
 
 def dobivreme(latitude,longitude):
-    try:
-        response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", timeout=5)
-        #response.raise_for_status()  # Raise exception for HTTP errors  
-        print(response)
-        if "application/json" not in response.headers.get("Content-Type", ""):
-            return {"Vreme": "failed"}
-        else:
-            result = response.json()
-            print(result)
-            result1 = [
-                {
-                    "time": time,
-                    "temperature_2m_max": temp,
-                    "weather_code": code
-                }
-                for time, temp, code in zip(
-                    result["daily"]["time"],
-                    result["daily"]["temperature_2m_max"],
-                    result["daily"]["weather_code"]
-                )
-            ]
-            return result1
-    except Exception as e:
-        print("Prislo je do napake: ", e)
-        return {"Vreme": "failed", "Error": e}
+    retries = 5
+    delay = 1
+    for i in range(retries):
+        try:
+            response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", timeout=5)
+            #response.raise_for_status()  # Raise exception for HTTP errors  
+            print(response)
+            if "application/json" not in response.headers.get("Content-Type", ""):
+                return {"Vreme": "failed"}
+            else:
+                result = response.json()
+                print(result)
+                result1 = [
+                    {
+                        "time": time,
+                        "temperature_2m_max": temp,
+                        "weather_code": code
+                    }
+                    for time, temp, code in zip(
+                        result["daily"]["time"],
+                        result["daily"]["temperature_2m_max"],
+                        result["daily"]["weather_code"]
+                    )
+                ]
+                return result1
+        except Exception as e:
+            print("Prislo je do napake: ", e)
+            time.sleep(delay)
+            
+            
     return {"Vreme": "failed"}
 
 
