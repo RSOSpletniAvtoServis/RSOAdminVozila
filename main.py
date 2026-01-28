@@ -1069,8 +1069,12 @@ def get_izbranavozila(voz2: Vozila2):
     return {"Vozilo": "failed"}
 
 
+class Vozila007(BaseModel):
+    stsas: List[str]
+    uniqueid: str
+
 @app.post("/izbranavozila1/")
-def get_izbranavozila1(voz2: Vozila2):
+def get_izbranavozila1(voz2: Vozila007):
     print(voz2.stsas)     # list[int]
     print(voz2.uniqueid)  # str
     ids_string = "("
