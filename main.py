@@ -187,7 +187,9 @@ def get_vreme(krajid: int):
 
                 if row is None:
                     raise HTTPException(status_code=404, detail="Kraj not found")
-
+                
+                vreme = dobivreme(row[3],row[2])
+                print(vreme)
                 return {
                     "IDKraj": row[0],
                     "NazivKraja": row[1],
@@ -207,7 +209,7 @@ def get_vreme(krajid: int):
 def dobivreme(latitude,longitude):
     try:
         data = {"iduporabnik": iduporabnik, "uniqueid": uniqueid}
-        response = requests.post(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", json=data, timeout=5)
+        response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", json=data, timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
         if "application/json" not in response.headers.get("Content-Type", ""):
