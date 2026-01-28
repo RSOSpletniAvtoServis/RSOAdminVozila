@@ -171,6 +171,38 @@ def get_kraj(krajid: int):
         raise HTTPException(status_code=500, detail="Database error")
     return {"Kraji": "undefined"}
 
+
+@app.get("/vreme/{krajid}")
+def get_vreme(krajid: int):
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT IDKraj, NazivKraja, Longitude, Latitude "
+                    "FROM Kraj WHERE IDKraj = %s",
+                    (krajid,)
+                )
+
+                row = cursor.fetchone()
+
+                if row is None:
+                    raise HTTPException(status_code=404, detail="Kraj not found")
+
+                return {
+                    "IDKraj": row[0],
+                    "NazivKraja": row[1],
+                    "Longitude": row[2],
+                    "Latitude": row[3],
+                }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+    return {"Kraji": "undefined"}
+
+
 @app.put("/posodobikraj/")
 def posodobi_kraj(kraj: Kraj1):
     userid = kraj.uniqueid
