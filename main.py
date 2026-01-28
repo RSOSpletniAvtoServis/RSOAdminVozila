@@ -13,7 +13,7 @@ import requests
 from typing import List
 
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
-
+EXTERNAL_API_URL =  os.getenv("EXTERNAL_API_URL","https://api.open-meteo.com/v1/forecast?")
 
 def validate_identifier(name: str) -> str:
     if not re.fullmatch(r"[A-Za-z0-9_]{1,64}", name):
@@ -201,6 +201,30 @@ def get_vreme(krajid: int):
         print("DB error:", e)
         raise HTTPException(status_code=500, detail="Database error")
     return {"Kraji": "undefined"}
+
+# Zacetek pridobivanja vremena
+
+def dobivreme(latitude,longitude):
+    try:
+        data = {"iduporabnik": iduporabnik, "uniqueid": uniqueid}
+        response = requests.post(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", json=data, timeout=5)
+        #response.raise_for_status()  # Raise exception for HTTP errors  
+        print(response)
+        if "application/json" not in response.headers.get("Content-Type", ""):
+            return {"Vreme": "failed"}
+        else:
+            result = response.json()
+            print(result)
+            return {"Vreme": "passed"}
+    except Exception as e:
+        print("Prislo je do napake: ", e)
+        return {"Vreme": "failed", "Error": e}
+    return {"Vreme": "failed"}
+
+
+# Konec pridobivanja vremena
+
+
 
 
 @app.put("/posodobikraj/")
