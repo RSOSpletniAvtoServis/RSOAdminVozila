@@ -60,13 +60,10 @@ class Kraj1(BaseModel):
 def read_root():
     return {"Mikrostoritev": "AdminVozila"}
 
-@app.get("/items/")
-def read_items():
-    return {"Tu": "So izdelki"}
-
 @app.get("/key/")
 def return_key():
     return {"Public key": "Kljuc"}
+    
 
 @app.post("/dodajkraj/")
 def dodajKraj(kraj: Kraj):
@@ -498,7 +495,7 @@ class Storitev2(BaseModel):
     uniqueid: str
 
 @app.post("/izbranestoritve/")
-def get_izbranikraji(storitev2: Storitev2):
+def get_izbranestoritve1(storitev2: Storitev2):
     print(storitev2.ids)     # list[int]
     print(storitev2.uniqueid)  # str
     ids_string = "("
@@ -631,7 +628,7 @@ class Status2(BaseModel):
     uniqueid: str
 
 @app.post("/izbranistatusi/")
-def get_izbranikraji(stat2: Storitev2):
+def get_izbranistatusi(stat2: Storitev2):
     print(stat2.ids)     # list[int]
     print(stat2.uniqueid)  # str
     ids_string = "("
