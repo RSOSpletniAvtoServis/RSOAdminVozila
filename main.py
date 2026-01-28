@@ -625,6 +625,37 @@ def posodobi_status(status: Status1):
     return {"Status": "unknown"}
 
 
+
+class Status2(BaseModel):
+    ids: List[int]
+    uniqueid: str
+
+@app.post("/izbranistatusi/")
+def get_izbranikraji(stat2: Storitev2):
+    print(stat2.ids)     # list[int]
+    print(stat2.uniqueid)  # str
+    ids_string = "("
+    idmiddle = ",".join(str(i) for i in stat2.ids)
+    full_string = "(" + idmiddle + ")"
+    print(ids_string)
+    print(idmiddle)
+    print(full_string)
+    
+    try:
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT IDStatus, NazivStatusa FROM Status WHERE IDStatus IN " + full_string
+                cursor.execute(sql)
+                rows = cursor.fetchall()
+        # Fixed columns → no need to read cursor.description
+        return {row[0]: row[1] for row in rows}
+
+    except Exception as e:
+        print("DB error:", e)
+        raise HTTPException(status_code=500, detail="Database error")
+        return {"Status": "failed"} 
+    return {"Status2": "failed"}
+
 # Za statuse konec
 
 #Za tennante začetek
