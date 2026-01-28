@@ -190,12 +190,7 @@ def get_vreme(krajid: int):
                 
                 vreme = dobivreme(row[3],row[2])
                 print(vreme)
-                return {
-                    "IDKraj": row[0],
-                    "NazivKraja": row[1],
-                    "Longitude": row[2],
-                    "Latitude": row[3],
-                }
+                return vreme
 
     except HTTPException:
         raise
