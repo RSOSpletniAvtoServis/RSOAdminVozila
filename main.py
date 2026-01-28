@@ -208,7 +208,7 @@ def get_vreme(krajid: int):
 
 def dobivreme(latitude,longitude):
     try:
-        response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", json=data, timeout=5)
+        response = requests.get(f"{EXTERNAL_API_URL}latitude={latitude}&longitude={longitude}&daily=temperature_2m_max,weather_code,precipitation_sum&timezone=Europe/Ljubljana", timeout=5)
         #response.raise_for_status()  # Raise exception for HTTP errors  
         print(response)
         if "application/json" not in response.headers.get("Content-Type", ""):
