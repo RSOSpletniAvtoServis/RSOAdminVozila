@@ -216,7 +216,19 @@ def dobivreme(latitude,longitude):
         else:
             result = response.json()
             print(result)
-            return result
+            result1 = [
+                {
+                    "time": time,
+                    "temperature_2m_max": temp,
+                    "weather_code": code
+                }
+                for time, temp, code in zip(
+                    result["daily"]["time"],
+                    result["daily"]["temperature_2m_max"],
+                    result["daily"]["weather_code"]
+                )
+            ]
+            return result1
     except Exception as e:
         print("Prislo je do napake: ", e)
         return {"Vreme": "failed", "Error": e}
