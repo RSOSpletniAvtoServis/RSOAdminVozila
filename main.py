@@ -1201,7 +1201,17 @@ def get_izbranavozila1(voz2: Vozila007):
     
 # Konec vozila
 
+# Za health checks
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+    
+@app.get("/health/live")
+def live():
+    return {"status": "alive"}
+
+@app.get("/health/ready")
+def ready():
+    return {"status": "ready"}
 
