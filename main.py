@@ -27,7 +27,7 @@ try:
     pool = mysql.connector.pooling.MySQLConnectionPool(
         pool_name="mypool",
         pool_size=5,
-        host="34.44.150.229",
+        host="127.0.0.1",               #34.44.150.229",
         user="zan",
         password=">tnitm&+NqgoA=q6",
         database="RSOAdminVozila",
@@ -1204,7 +1204,7 @@ def get_izbranavozila1(voz2: Vozila007):
 # Za health checks
 
 @app.get("/health")
-async def health():
+def health():
     return {"status": "ok"}
     
 @app.get("/health/live")
