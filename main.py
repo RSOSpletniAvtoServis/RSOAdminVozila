@@ -905,7 +905,7 @@ def get_tennanti(vodja: VodjaProst):
                     usernames_response = stub.Usernames(
                         upoprigrpc_pb2.GetUsernamesRequest(
                             ids=vodja_ids,
-                            uniqueid=vodja.uniqueid
+                            uniqueid=int(vodja.uniqueid)
                         )
                     )
 
