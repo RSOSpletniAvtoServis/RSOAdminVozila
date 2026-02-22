@@ -12,9 +12,14 @@ import os
 import requests
 import time
 from typing import List
-import time
+
+import grpc
+
+import upoprigrpc_pb2
+import upoprigrpc_pb2_grpc
 
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
+SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
 EXTERNAL_API_URL =  os.getenv("EXTERNAL_API_URL","https://api.open-meteo.com/v1/forecast?")
 
 def validate_identifier(name: str) -> str:
@@ -810,8 +815,10 @@ def dodajTennanta(tennant: Tennant):
 class VodjaProst(BaseModel):
     uniqueid: str
 
-@app.post("/tennanti/")
-def get_tennanti(vodja: VodjaProst):
+
+# tennanti old begin
+@app.post("/tennantiold/")
+def get_tennantiold(vodja: VodjaProst):
     userid = vodja.uniqueid
     try:
         with pool.get_connection() as conn:
@@ -865,6 +872,91 @@ def get_tennanti(vodja: VodjaProst):
         print("DB error:", e)
         #raise HTTPException(status_code=500, detail="Database error")
     return {"Tennant": "failed"}    
+
+#tennanti old end
+
+
+# tennanti gRPC Zacetek
+
+@app.post("/tennanti/")
+def get_tennanti(vodja: VodjaProst):
+    userid = vodja.uniqueid
+    try:
+        
+        
+        with pool.get_connection() as conn:
+            with conn.cursor() as cursor:
+                
+                cursor.execute("SELECT IDVodja FROM TennantLookup WHERE IDVodja IS NOT NULL")
+                rows = cursor.fetchall()
+                vodja_ids = list({
+                row[0]
+                for row in rows
+                if row[0] is not None
+                })
+                print(vodja_ids)
+                
+                with grpc.insecure_channel(SERVICE_UPOPRI_GRPC_URL) as channel:
+                    stub = upoprigrpc_pb2_grpc.UserServiceStub(channel)
+
+                    # -------------------------
+                    # 1️⃣ Usernames
+                    # -------------------------
+                    usernames_response = stub.Usernames(
+                        upoprigrpc_pb2.GetUsernamesRequest(
+                            ids=vodja_ids,
+                            uniqueid=vodja.uniqueid
+                        )
+                    )
+
+                    print("\nUsernames:")
+                    for user in usernames_response.usernames:
+                        print(user.IDUporabnik, user.UporabniskoIme)
+            
+                fail = 0
+                try:
+                    data = {"ids": vodja_ids, "uniqueid": vodja.uniqueid}
+                    response = requests.post(f"{SERVICE_UPOPRI_URL}/usernames/", json=data, timeout=5)
+                    #response.raise_for_status()  # Raise exception for HTTP errors  
+                    print(response)
+                    if "application/json" not in response.headers.get("Content-Type", ""):
+                        cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                        rows = cursor.fetchall()
+                        # Fixed columns → no need to read cursor.description
+                        return [
+                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": None}
+                            for row in rows
+                        ]
+                    else:
+                        result = response.json()
+                        print(result)
+                        
+                        cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                        rows = cursor.fetchall()
+                        # Fixed columns → no need to read cursor.description
+                        return [
+                            {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": result.get(str(row[4]))}
+                            for row in rows
+                        ]
+                except Exception as e:
+                    print("Prislo je do napake: ", e)
+                    fail = 1
+                if fail == 1:
+                    cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
+                    rows = cursor.fetchall()
+                    # Fixed columns → no need to read cursor.description
+                    return [
+                        {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": None}
+                        for row in rows
+                    ]
+    except Exception as e:
+        print("DB error:", e)
+        #raise HTTPException(status_code=500, detail="Database error")
+    return {"Tennant": "failed"}
+
+# tennanti gRPC Konec
+
+
 
 
 # Zacetek funkcija za vse tennante
