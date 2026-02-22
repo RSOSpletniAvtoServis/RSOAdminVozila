@@ -15,8 +15,8 @@ from typing import List
 
 import grpc
 
-from app import upoprigrpc_pb2
-from app import upoprigrpc_pb2_grpc
+import upoprigrpc_pb2
+import upoprigrpc_pb2_grpc
 
 SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
 SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
