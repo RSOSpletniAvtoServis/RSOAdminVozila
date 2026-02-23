@@ -916,7 +916,7 @@ def get_tennanti(vodja: VodjaProst):
                         user.IDUporabnik: user.UporabniskoIme
                         for user in usernames_response.usernames
                     }
-            
+                    print("Hej hoj gRPC DELA!!!")
                 fail = 0
                 try:    
                     cursor.execute("SELECT IDTennant, NazivTennanta, TennantDBNarocila, TennantDBPoslovalnice, IDVodja FROM TennantLookup")
@@ -926,7 +926,6 @@ def get_tennanti(vodja: VodjaProst):
                         {"IDTennant": row[0], "NazivTennanta": row[1], "TennantDBNarocila": row[2], "TennantDBPoslovalnice": row[3], "IDVodja": row[4], "username": user_dict[row[4]]}
                         for row in rows
                     ]
-                    print("Hej hoj gRPC DELA!!!")
                 except Exception as e:
                     print("Prislo je do napake: ", e)
                     fail = 1
