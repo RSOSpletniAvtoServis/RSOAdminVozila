@@ -19,7 +19,7 @@ import upoprigrpc_pb2
 import upoprigrpc_pb2_grpc
 
 DB_URL = os.getenv("DB_URL","127.0.0.1")
-SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL")
+SERVICE_UPOPRI_URL = os.getenv("SERVICE_UPOPRI_URL","http://upopri:8000/upopri")
 SERVICE_UPOPRI_GRPC_URL = os.getenv("SERVICE_UPOPRI_GRPC_URL","upoprigrpc:50051")
 EXTERNAL_API_URL =  os.getenv("EXTERNAL_API_URL","https://api.open-meteo.com/v1/forecast?")
 
